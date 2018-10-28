@@ -1,0 +1,12 @@
+import random
+import pyaudio
+
+val=0
+
+#import val from first row, second column of test_table
+
+val2=val*3
+
+r=random.randint(0,500)
+
+#save val2 and r to a new row in test_table
