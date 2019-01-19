@@ -1,3 +1,61 @@
-v=3
+import queue
+import Thread
 
-#send v back to the app
+max_size=10
+master_variable=0
+
+first_clip=0
+queue_1=queue.Queue(maxsize=max_size)
+queue_2=queue.Queue(maxsize=max_size)
+
+
+def set_up_queues(x, var):
+    if var==0:
+        global first_clip
+        first_clip=x
+    else:
+        queue_1.put(x)
+
+
+
+def function_1(q):
+    while not q.empty():
+        item=q.get()
+        variable=1
+        queue_2.put(variable)
+        q.task_done()
+
+
+def function_2(q):
+    while not q.empty():
+        item = q.get()
+        master_variable=master_variable+item
+        q.task_done()
+
+
+num_threads = 3
+
+for i in range(num_threads):
+    worker = Thread(target=function_1, args=(queue_1,))
+    worker.setDaemon(True)
+    worker.start()
+
+#only after the front end has confirmed that the user is done talking
+#or it's been recording for a full minute:
+
+queue_1.join()
+
+for i in range(num_threads):
+     worker = Thread(target=function_2, args=(queue_2,))
+     worker.setDaemon(True)
+     worker.start()
+#
+queue_2.join()
+
+prompt=[] #pull some prompt from the back end
+
+final_variable=(master_variable, prompt)
+
+#return master_variable to front end
+#save master_variable to table checkin_test
+#if we succeed, master_variable will be the # of clips - 1.
